@@ -5,6 +5,18 @@ An advanced autonomous robot designed for precision navigation on complex tracks
 ## 🚀 Overview
 Developed as part of a robotics competition, this robot is engineered to solve the classic line-following problem with an emphasis on **stability** and **dynamic recovery**. Unlike basic binary logic robots, this system uses weighted analog inputs to calculate its position relative to the line with high resolution.
 
+
+
+##media 
+
+
+<img width="899" height="1599" alt="WhatsApp Image 2026-05-02 at 13 30 08" src="https://github.com/user-attachments/assets/72068a0f-3134-41c3-959a-18dcf8703dd0" />
+<img width="899" height="1599" alt="WhatsApp Image 2026-05-02 at 13 30 09" src="https://github.com/user-attachments/assets/9b81aa0d-4778-41e7-9921-346aa6c543e2" />
+
+
+https://github.com/user-attachments/assets/1617c5f0-c209-4634-b026-1e509165e388
+
+
 ## 🛠️ Key Features
 *   **PID Control System:** Implements a full feedback loop to minimize oscillation and prevent overshooting on sharp turns.
 *   **Automated Calibration:** Features a startup calibration phase that adapts to ambient lighting and track reflectance levels.

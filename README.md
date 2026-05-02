@@ -1,1 +1,41 @@
-High-Speed Autonomous PID Line FollowerAn advanced autonomous robot designed for precision navigation on complex tracks. This project utilizes a PID (Proportional-Integral-Derivative) control loop and high-frequency analog sensor sampling to achieve smooth, high-speed movement and efficient cornering.🚀 OverviewDeveloped as part of a robotics competition, this robot is engineered to solve the classic line-following problem with an emphasis on stability and dynamic recovery. Unlike basic binary logic robots, this system uses weighted analog inputs to calculate its position relative to the line with high resolution.🛠️ Key FeaturesPID Control System: Implements a full feedback loop to minimize oscillation and prevent overshooting on sharp turns.Automated Calibration: Features a startup calibration phase that adapts to ambient lighting and track reflectance levels.Smart Recovery Logic: Includes "lost-line" memory, allowing the robot to remember its last known position and navigate back to the track if it overshoots.Optimized Performance: Tuned for a balance between aggressive speed ($BASE\_SPEED = 190$) and precise steering.📐 The Control AlgorithmThe heart of the robot is the PID controller, which calculates the motor speed correction based on the error from the center of the track:$$Output = (K_p \cdot e(t)) + (K_i \int e(t) dt) + (K_d \frac{de(t)}{dt})$$Proportional ($K_p$): Reacts to the current error.Integral ($K_i$): Corrects long-term steady-state errors.Derivative ($K_d$): Predicts future error by analyzing the rate of change, providing a "braking" effect to stabilize the robot.🔌 Hardware StackMicrocontroller: Arduino (Atmega328P)Sensors: 5-Channel QTR Analog Reflectance Sensor ArrayMotor Driver: Dual H-Bridge (L298N / TB6612FNG)Chassis: Differential Drive System📂 Project Structureperfectcode.ino: The main production firmware including calibration, sensing, and PID logic.  .gitignore: Configured to keep the repository clean of Arduino build artifacts.🚦 How to UseHardware Wiring: Connect the IR sensors to analog pins A1-A5 and the motor driver to the defined PWM pins.Calibration: Upon power-up, the built-in LED will light up. Manually move the robot across the black line for 10 seconds to allow it to learn the track's reflectance values.Run: Once the LED turns off, the robot is ready to go.📈 Future ImprovementsImplementing Speed Ramp-up for long straightaways.Adding Encoder Feedback for more precise velocity control.Integrating a wireless module for real-time PID tuning via a mobile app.
+# High-Speed Autonomous PID Line Follower
+
+An advanced autonomous robot designed for precision navigation on complex tracks. This project utilizes a **PID (Proportional-Integral-Derivative)** control loop and high-frequency analog sensor sampling to achieve smooth, high-speed movement and efficient cornering.
+
+## 🚀 Overview
+Developed as part of a robotics competition, this robot is engineered to solve the classic line-following problem with an emphasis on **stability** and **dynamic recovery**. Unlike basic binary logic robots, this system uses weighted analog inputs to calculate its position relative to the line with high resolution.
+
+## 🛠️ Key Features
+*   **PID Control System:** Implements a full feedback loop to minimize oscillation and prevent overshooting on sharp turns.
+*   **Automated Calibration:** Features a startup calibration phase that adapts to ambient lighting and track reflectance levels.
+*   **Smart Recovery Logic:** Includes "lost-line" memory, allowing the robot to remember its last known position and navigate back to the track if it overshoots.
+*   **Optimized Performance:** Tuned for a balance between aggressive speed ($BASE\_SPEED = 190$) and precise steering.
+
+## 📐 The Control Algorithm
+The heart of the robot is the PID controller, which calculates the motor speed correction based on the error from the center of the track:
+
+$$Output = (K_p \cdot e(t)) + (K_i \int e(t) dt) + (K_d \frac{de(t)}{dt})$$
+
+*   **Proportional ($K_p$):** Reacts to the current error.
+*   **Integral ($K_i$):** Corrects long-term steady-state errors.
+*   **Derivative ($K_d$):** Predicts future error by analyzing the rate of change, providing a "braking" effect to stabilize the robot.
+
+## 🔌 Hardware Stack
+*   **Microcontroller:** Arduino (Atmega328P)
+*   **Sensors:** 5-Channel QTR Analog Reflectance Sensor Array
+*   **Motor Driver:** Dual H-Bridge (L298N / TB6612FNG)
+*   **Chassis:** Differential Drive System
+
+## 📂 Project Structure
+*   `perfectcode.ino`[cite: 1]: The main production firmware including calibration, sensing, and PID logic.
+*   `.gitignore`: Configured to keep the repository clean of Arduino build artifacts.
+
+## 🚦 How to Use
+1.  **Hardware Wiring:** Connect the IR sensors to analog pins A1-A5 and the motor driver to the defined PWM pins.
+2.  **Calibration:** Upon power-up, the built-in LED will light up. Manually move the robot across the black line for 10 seconds to allow it to learn the track's reflectance values.
+3.  **Run:** Once the LED turns off, the robot is ready to go.
+
+## 📈 Future Improvements
+*   Implementing **Speed Ramp-up** for long straightaways.
+*   Adding **Encoder Feedback** for more precise velocity control.
+*   Integrating a wireless module for real-time PID tuning via a mobile app.

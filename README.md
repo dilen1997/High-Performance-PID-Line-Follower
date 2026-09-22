@@ -1,53 +1,102 @@
-# High-Speed Autonomous PID Line Follower
+# PID Line Follower
 
-An advanced autonomous robot designed for precision navigation on complex tracks. This project utilizes a **PID (Proportional-Integral-Derivative)** control loop and high-frequency analog sensor sampling to achieve smooth, high-speed movement and efficient cornering.
+**An Arduino Nano robot that follows a black line using five analog reflectance sensors and differential motor control.**
 
-## 🚀 Overview
-Developed as part of a robotics competition, this robot is engineered to solve the classic line-following problem with an emphasis on **stability** and **dynamic recovery**. Unlike basic binary logic robots, this system uses weighted analog inputs to calculate its position relative to the line with high resolution.
+[Build & upload](#build--upload) · [Wiring](docs/HARDWARE.md) · [Control & tuning](docs/CONTROL.md) · [Track demonstration](media/track-demo.mp4)
 
+<p align="center">
+  <img src="media/robot-overview.jpeg" alt="Assembled line-following robot" width="330" />
+  <img src="media/chassis-electronics.jpeg" alt="Arduino Nano and chassis electronics" width="330" />
+</p>
 
+| Controller | Sensing | Firmware | Dependency |
+| --- | --- | --- | --- |
+| Arduino Nano / ATmega328P | 5 analog QTR channels | Arduino C++ | Pololu QTRSensors 4.0.0 |
 
-##media 
+## Project overview
 
+The robot estimates the line position, computes a steering correction, and drives the two motors independently. The project demonstrates sensor calibration, feedback control, PWM motor control, and handling of missing or ambiguous sensor readings.
 
-<img width="899" height="1599" alt="WhatsApp Image 2026-05-02 at 13 30 08" src="https://github.com/user-attachments/assets/72068a0f-3134-41c3-959a-18dcf8703dd0" />
-<img width="899" height="1599" alt="WhatsApp Image 2026-05-02 at 13 30 09" src="https://github.com/user-attachments/assets/9b81aa0d-4778-41e7-9921-346aa6c543e2" />
+The controller has proportional, integral, and derivative terms. **The supplied tuning uses PD control: the integral gain is zero.** The project does not include measured speed, lap-time, or accuracy benchmarks.
 
+## Firmware status
 
-https://github.com/user-attachments/assets/1617c5f0-c209-4634-b026-1e509165e388
+The photos and video show the original physical project. The maintained firmware passes controller regression tests and builds with PlatformIO for the Nano, but its updated recovery behavior **still requires a track test on the robot**.
 
+The original uploaded firmware is preserved at [`legacy/line_follower_original.ino`](legacy/line_follower_original.ino). The active sketch is [`firmware/LineFollower/LineFollower.ino`](firmware/LineFollower/LineFollower.ino).
 
-## 🛠️ Key Features
-*   **PID Control System:** Implements a full feedback loop to minimize oscillation and prevent overshooting on sharp turns.
-*   **Automated Calibration:** Features a startup calibration phase that adapts to ambient lighting and track reflectance levels.
-*   **Smart Recovery Logic:** Includes "lost-line" memory, allowing the robot to remember its last known position and navigate back to the track if it overshoots.
-*   **Optimized Performance:** Tuned for a balance between aggressive speed ($BASE\_SPEED = 190$) and precise steering.
+## What the maintained firmware does
 
-## 📐 The Control Algorithm
-The heart of the robot is the PID controller, which calculates the motor speed correction based on the error from the center of the track:
+- Calibrates all five sensors over 400 sampling iterations at startup.
+- Reads a calibrated line position between 0 and 4000, with a center target of 2000.
+- Applies a differential PD correction and limits motor output to ±210 PWM.
+- Uses a threshold on the calibrated 0–1000 sensor scale.
+- Remembers the last observed side of the line for a slow recovery turn.
+- Stops after 750 ms without reacquiring the line, or immediately if no search direction is known.
+- Resumes tracking when the line reappears, without a derivative spike from the recovery interval.
 
-$$Output = (K_p \cdot e(t)) + (K_i \int e(t) dt) + (K_d \frac{de(t)}{dt})$$
+## Build & upload
 
-*   **Proportional ($K_p$):** Reacts to the current error.
-*   **Integral ($K_i$):** Corrects long-term steady-state errors.
-*   **Derivative ($K_d$):** Predicts future error by analyzing the rate of change, providing a "braking" effect to stabilize the robot.
+### Arduino IDE
 
-## 🔌 Hardware Stack
-*   **Microcontroller:** Arduino (Atmega328P)
-*   **Sensors:** 5-Channel QTR Analog Reflectance Sensor Array
-*   **Motor Driver:** Dual H-Bridge (L298N / TB6612FNG)
-*   **Chassis:** Differential Drive System
+1. Install **QTRSensors by Pololu**, version **4.0.0**, from Library Manager.
+2. Open `firmware/LineFollower/LineFollower.ino`.
+3. Select **Arduino Nano** and the processor/bootloader matching your board.
+4. Check the [wiring reference](docs/HARDWARE.md), then upload through USB.
 
-## 📂 Project Structure
-*   `perfectcode.ino`[cite: 1]: The main production firmware including calibration, sensing, and PID logic.
-*   `.gitignore`: Configured to keep the repository clean of Arduino build artifacts.
+### PlatformIO
 
-## 🚦 How to Use
-1.  **Hardware Wiring:** Connect the IR sensors to analog pins A1-A5 and the motor driver to the defined PWM pins.
-2.  **Calibration:** Upon power-up, the built-in LED will light up. Manually move the robot across the black line for 10 seconds to allow it to learn the track's reflectance values.
-3.  **Run:** Once the LED turns off, the robot is ready to go.
+```bash
+git clone https://github.com/dilen1997/High-Performance-PID-Line-Follower.git
+cd High-Performance-PID-Line-Follower
+pio run -e nanoatmega328
+pio run -e nanoatmega328 --target upload
+```
 
-## 📈 Future Improvements
-*   Implementing **Speed Ramp-up** for long straightaways.
-*   Adding **Encoder Feedback** for more precise velocity control.
-*   Integrating a wireless module for real-time PID tuning via a mobile app.
+The configuration pins the AVR platform and sensor-library versions. A Nano clone may need a different bootloader/upload setting; that setting does not change the control algorithm.
+
+## Startup and first run
+
+1. Raise the wheels and power on the robot.
+2. While the built-in LED is lit, manually sweep **each** sensor across both black and white surfaces.
+3. When the LED turns off, a one-second delay precedes control. Calibration duration depends on sampling; it is not a fixed ten-second timer.
+4. Confirm that a positive command drives each motor forward, and that a line on the left produces a left turn.
+5. Begin at a reduced `kBaseSpeed` in `Control.h`, then tune on the real track.
+
+See the [hardware acceptance steps](docs/HARDWARE.md#hardware-acceptance) before using the maintained revision at the original cruising setting.
+
+## Control settings
+
+| Parameter | Supplied value | Meaning |
+| --- | ---: | --- |
+| `kKp` | 0.363 | Position-error correction |
+| `kKi` | 0.0 | Integral disabled |
+| `kKd` | 0.677 | Difference between consecutive errors |
+| `kBaseSpeed` | 190 | Nominal PWM, not a measured velocity |
+| `kMaxSpeed` | 210 | Absolute motor PWM limit |
+| `kRecoverySpeed` | 65 | Recovery-turn PWM |
+| `kRecoveryTimeoutMs` | 750 | Maximum continuous search interval |
+
+The gains preserve the original code's division by ten. The controller uses per-loop error differences, not a fixed-time derivative; changing sampling rate can change the tuning.
+
+## Repository guide
+
+| Path | Purpose |
+| --- | --- |
+| `firmware/LineFollower/` | Active Arduino sketch and host-testable controller |
+| `legacy/` | Unmodified original firmware |
+| `media/` | Original photos and one canonical demonstration video |
+| `docs/` | Pin reference, calibration, control design, and verification limits |
+| `tests/` | Tracking, recovery, timeout, and timer-rollover regression checks |
+
+Run the controller tests on a computer with a C++11 compiler:
+
+```bash
+g++ -std=c++11 -Wall -Wextra -Werror -Ifirmware/LineFollower tests/test_control.cpp -o test_control
+./test_control
+```
+
+## Author & license
+
+**Dilen Guerchon** · Electrical & Electronics Engineering student, Ruppin Academic Center
+[Engineering portfolio](https://github.com/dilen1997/Smart-Charge-Manager/blob/main/docs/PORTFOLIO.md) · [MIT license](LICENSE)
